@@ -202,8 +202,8 @@ uint8_t gs232_parse_command(gs232_t **ctx, char *buffer, uint32_t buffer_len) {
     DBG_PRINT("buffer[%d]: %s\n", buffer_len, buffer);
     DBG_HEX(buffer, buffer_len);
 
-    if (buffer == NULL || buffer_len < 2 || buffer[buffer_len - 1] != '\r') {
-        DBG_PRINT("FAIL AT START! (NULL= %s, LEN: %d, END: %02x\n", (buffer == NULL) ? "true" : "false", buffer_len, buffer[buffer_len]);
+    if (buffer == NULL || buffer_len < 2 || buffer[buffer_len - 1] == '\r' || (buffer[buffer_len - 1] == '\r' && buffer[buffer_len] == '\n')) {
+        DBG_PRINT("FAIL AT START! (NULL= %s, LEN: %d, END: %02x)\n", (buffer == NULL) ? "true" : "false", buffer_len, buffer[buffer_len]);
         return GS232_FAIL;
     }
 
@@ -516,8 +516,8 @@ uint8_t gs232_return_string(gs232_t *ctx, uint8_t command, char **ret_str) {
 
         case GS232_RETURN_AZIMUTH_AND_ELEVATION: // C2
         {
-            char tmp[18];
-            sprintf(tmp, "%s%03d%s%03d\r", ctx->b_protocol ? "AZ=" : "+0", ctx->azimuth, ctx->b_protocol ? "EL=" : "+0", ctx->elevation);
+            char tmp[19];
+            sprintf(tmp, "%s%03d%s%03d\r\n", ctx->b_protocol ? "AZ=" : "+0", ctx->azimuth, ctx->b_protocol ? "EL=" : "+0", ctx->elevation);
             (*ret_str) = strdup(tmp);
         }
 
@@ -569,9 +569,9 @@ uint8_t gs232_return_string(gs232_t *ctx, uint8_t command, char **ret_str) {
 
         case GS232_TOTAL_NUMBER_OF_SETTING_ANGLES: // N
         {
-            char tmp[15];
+            char tmp[16];
             // TODO: current used point start on 0 or 1 ??
-            sprintf(tmp, "%s%04d%s%04d\r", ctx->b_protocol ? "=" : "+", ctx->current_point + 1, ctx->b_protocol ? "=" : "+", ctx->memory_qty);
+            sprintf(tmp, "%s%04d%s%04d\r\n", ctx->b_protocol ? "=" : "+", ctx->current_point + 1, ctx->b_protocol ? "=" : "+", ctx->memory_qty);
             (*ret_str) = strdup(tmp);
         }
 

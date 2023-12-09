@@ -202,7 +202,7 @@ uint8_t gs232_parse_command(gs232_t **ctx, char *buffer, uint32_t buffer_len) {
     DBG_PRINT("buffer[%d]: %s\n", buffer_len, buffer);
     DBG_HEX(buffer, buffer_len);
 
-    if (buffer[buffer_len - 1] == '\n') // some software
+    if (buffer[buffer_len - 1] == '\n') // some software (not standard!)
         --buffer_len;
 
     if (buffer == NULL || buffer_len < 2 || buffer[buffer_len - 1] != '\r') {

@@ -72,6 +72,41 @@ enum GS232_COMMAND {
     GS232_UNKNOWN_COMMAND                                 /*!< unknown command */
 };
 
+// functions prototype for hardware
+/**
+ * @fn uint8_t (*rotator_set_azimuth)(uint16_t azimuth)
+ * @brief Set azimuth position
+ *
+ * @param azimuth Azimuth
+ * @return OK=0, 1=ERROR
+ */
+typedef  uint8_t (*rotator_set_azimuth)(uint16_t azimuth);
+
+/**
+ * @fn uint16_t (*rotator_get_azimuth)(void)
+ * @brief Get azimuth position
+ *
+ * @return Azimuth
+ */
+typedef uint16_t (*rotator_get_azimuth)(void);
+
+/**
+ * @fn uint8_t (*rotator_set_elevation)(uint16_t elevation)
+ * @brief Set elevation position
+ *
+ * @param Elevation
+ * @return OK=0, 1=ERROR
+ */
+typedef uint8_t (*rotator_set_elevation)(uint16_t elevation);
+
+/**
+ * @fn uint16_t (*rotator_get_elevation)(void)
+ * @brief Get elevation position
+ *
+ * @return Elevation
+ */
+typedef uint16_t (*rotator_get_elevation)(void);
+
 /**
  * @typedef gs232_t
  * @brief Context GS-232 data
@@ -87,6 +122,12 @@ typedef struct {
     uint16_t memory[MEMORY_POINTS];   /*!< memory */
     uint16_t memory_qty;              /*!< memory used */
     uint16_t current_point;           /*!< currently selected memorized point */
+    struct {
+          rotator_set_azimuth set_azimuth;
+          rotator_get_azimuth get_azimuth;
+        rotator_set_elevation set_elevation;
+        rotator_get_elevation get_elevation;
+    } fn;
 } gs232_t;
 
 /**
@@ -128,5 +169,7 @@ uint8_t gs232_parse_command(gs232_t **ctx, char *buffer, uint32_t buffer_len);
  * @return GS232_ERROR
  */
 uint8_t gs232_return_string(gs232_t *ctx, uint8_t command, char **ret_str);
+
+
 
 #endif /* LIB_GS232_H_ */

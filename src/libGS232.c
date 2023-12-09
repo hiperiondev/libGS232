@@ -190,9 +190,11 @@ static uint32_t gs232_check_values(gs232_t **ctx, uint8_t value_type) {
             break;
 
         default:
+            DBG_PRINT("GS232_FAIL\n");
             return GS232_FAIL;
     }
 
+    DBG_PRINT("GS232_OK\n");
     return GS232_OK;
 }
 
@@ -207,7 +209,7 @@ uint8_t gs232_parse_command(gs232_t **ctx, char *buffer, uint32_t buffer_len) {
 
     uint8_t command = GS232_FAIL;
 
-    DBG_PRINT("COMMAND: %c\n", toupper(buffer[0]));
+    DBG_PRINT("PARSE COMMAND: %c\n", toupper(buffer[0]));
     switch (toupper(buffer[0])) {
         case 'R':
             command =  GS232_CLOCKWISE_ROTATION;
@@ -351,6 +353,7 @@ uint8_t gs232_parse_command(gs232_t **ctx, char *buffer, uint32_t buffer_len) {
                     command = GS232_LIST_OF_COMMANDS2;
                     break;
 
+                ///////////////// GS-232B /////////////////
                 case '3':
                     if (!(*ctx)->b_protocol)
                         command = GS232_UNKNOWN_COMMAND;
@@ -361,7 +364,6 @@ uint8_t gs232_parse_command(gs232_t **ctx, char *buffer, uint32_t buffer_len) {
             break;
 
         //////////////////// GS-232B ////////////////////
-
         case 'P':
             if (!(*ctx)->b_protocol)
                 command = GS232_UNKNOWN_COMMAND;
@@ -388,7 +390,7 @@ uint8_t gs232_parse_command(gs232_t **ctx, char *buffer, uint32_t buffer_len) {
     return command;
 }
 
-uint8_t gs232_return_string(gs232_t *gs232, uint8_t command, char **ret_str) {
+uint8_t gs232_return_string(gs232_t *ctx, uint8_t command, char **ret_str) {
     DBG_PRINT("command: %s\n", GS232_COMMAND_STR[command]);
     switch (command) {
         case GS232_CLOCKWISE_ROTATION:
@@ -488,9 +490,9 @@ uint8_t gs232_return_string(gs232_t *gs232, uint8_t command, char **ret_str) {
                     "@ Center\r\0";
 
             ptr = strchr(tmp, '@');
-            *ptr = gs232->azimuth_nord_south ? 'S' : 'N';
+            *ptr = ctx->azimuth_nord_south ? 'S' : 'N';
             ptr = strchr(tmp, '#');
-            if (gs232->is_450_degrees) {
+            if (ctx->is_450_degrees) {
                 *ptr = '4';
                 *(ptr + 1) = '5';
             } else {
@@ -506,7 +508,7 @@ uint8_t gs232_return_string(gs232_t *gs232, uint8_t command, char **ret_str) {
         case GS232_RETURN_CURRENT_AZIMUTH: // C
         {
             char tmp[10];
-            sprintf(tmp, "%s%03d\r", gs232->b_protocol ? "AZ=" : "+0", gs232->azimuth);
+            sprintf(tmp, "%s%03d\r", ctx->b_protocol ? "AZ=" : "+0", ctx->azimuth);
             (*ret_str) = strdup(tmp);
         }
 
@@ -515,7 +517,7 @@ uint8_t gs232_return_string(gs232_t *gs232, uint8_t command, char **ret_str) {
         case GS232_RETURN_AZIMUTH_AND_ELEVATION: // C2
         {
             char tmp[18];
-            sprintf(tmp, "%s%03d%s%03d\r", gs232->b_protocol ? "AZ=" : "+0", gs232->azimuth, gs232->b_protocol ? "EL=" : "+0", gs232->elevation);
+            sprintf(tmp, "%s%03d%s%03d\r", ctx->b_protocol ? "AZ=" : "+0", ctx->azimuth, ctx->b_protocol ? "EL=" : "+0", ctx->elevation);
             (*ret_str) = strdup(tmp);
         }
 
@@ -524,7 +526,7 @@ uint8_t gs232_return_string(gs232_t *gs232, uint8_t command, char **ret_str) {
         case GS232_RETURN_CURRENT_ELEVATION: // B
         {
             char tmp[10];
-            sprintf(tmp, "%s%03d\r", gs232->b_protocol ? "EL=" : "+0", gs232->elevation);
+            sprintf(tmp, "%s%03d\r", ctx->b_protocol ? "EL=" : "+0", ctx->elevation);
             (*ret_str) = strdup(tmp);
         }
             break;
@@ -569,7 +571,7 @@ uint8_t gs232_return_string(gs232_t *gs232, uint8_t command, char **ret_str) {
         {
             char tmp[15];
             // TODO: current used point start on 0 or 1 ??
-            sprintf(tmp, "%s%04d%s%04d\r", gs232->b_protocol ? "=" : "+", gs232->current_point + 1, gs232->b_protocol ? "=" : "+", gs232->memory_qty);
+            sprintf(tmp, "%s%04d%s%04d\r", ctx->b_protocol ? "=" : "+", ctx->current_point + 1, ctx->b_protocol ? "=" : "+", ctx->memory_qty);
             (*ret_str) = strdup(tmp);
         }
 

@@ -17,7 +17,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define DEBUG /*!< debug mode */
+#define DEBUG               /*!< debug mode */
 #define MEMORY_POINTS  3800 /*!< total memory points */
 
 /**

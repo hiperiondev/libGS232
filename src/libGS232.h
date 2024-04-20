@@ -216,7 +216,7 @@ uint8_t gs232_return_string(gs232_t *ctx, uint8_t command, char **ret_str);
 /////////////////// utils ///////////////////
 
 /**
- * @fn uint32_t shortestPath(float start_azimuth, float start_elevation, float end_azimuth, float end_elevation, float **intermediatePoints_azimuth,
+ * @fn uint32_t shortest_path(float start_azimuth, float start_elevation, float end_azimuth, float end_elevation, float **intermediatePoints_azimuth,
         float **intermediatePoints_elevation, float *azimuth, float *elevation)
  * @brief Calculate the shortest path between two points, return intermediate points
  *
@@ -230,7 +230,7 @@ uint8_t gs232_return_string(gs232_t *ctx, uint8_t command, char **ret_str);
  * @param elevation Elevation
  * @return Number of intermediate points
  */
-uint32_t shortestPath(float start_azimuth, float start_elevation, float end_azimuth, float end_elevation, float **intermediatePoints_azimuth,
+uint32_t shortest_path(float start_azimuth, float start_elevation, float end_azimuth, float end_elevation, float **intermediatePoints_azimuth,
         float **intermediatePoints_elevation, float *azimuth, float *elevation);
 
 #endif /* LIB_GS232_H_ */

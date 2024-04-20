@@ -622,7 +622,7 @@ uint8_t gs232_deinit(gs232_t **ctx) {
 
 /////////////////// utils ///////////////////
 
-uint32_t shortestPath(float start_azimuth, float start_elevation, float end_azimuth, float end_elevation, float **intermediatePoints_azimuth,
+uint32_t shortest_path(float start_azimuth, float start_elevation, float end_azimuth, float end_elevation, float **intermediatePoints_azimuth,
         float **intermediatePoints_elevation, float *azimuth, float *elevation) {
     float azimuthDiff = end_azimuth - start_azimuth;
     float elevationDiff = end_elevation - start_elevation;

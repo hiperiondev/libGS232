@@ -46,6 +46,10 @@ Create return string for parsed command buffer
 ```C
 uint8_t gs232_return_string(gs232_t *ctx, uint8_t command, char *ret_str);
 ```
+UTILITY: Calculate the shortest path between two points, return intermediate points
+```C
+uint32_t shortest_path(float start_azimuth, float start_elevation, float end_azimuth, float end_elevation, float **intermediatePoints_azimuth, float **intermediatePoints_elevation, float *azimuth, float *elevation)
+```
 
 <!-- Roadmap -->
 ## :compass: Roadmap

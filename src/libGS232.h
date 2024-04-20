@@ -72,7 +72,9 @@ enum GS232_COMMAND {
     GS232_UNKNOWN_COMMAND                                 /*!< unknown command */
 };
 
-// functions prototype for hardware
+typedef struct gs232_s gs232_t;
+
+// functions prototype for hardware implementation
 /**
  * @fn uint8_t (*rotator_set_azimuth)(uint16_t azimuth)
  * @brief Set azimuth position
@@ -80,7 +82,7 @@ enum GS232_COMMAND {
  * @param azimuth Azimuth
  * @return OK=0, 1=ERROR
  */
-typedef  uint8_t (*rotator_set_azimuth)(uint16_t azimuth);
+typedef uint8_t (*rotator_set_azimuth)(uint16_t azimuth);
 
 /**
  * @fn uint16_t (*rotator_get_azimuth)(void)
@@ -108,27 +110,68 @@ typedef uint8_t (*rotator_set_elevation)(uint16_t elevation);
 typedef uint16_t (*rotator_get_elevation)(void);
 
 /**
+ * @fn bool (*rotator_offset_calibration_azimuth)(gs232_t **ctx
+ * @brief  Calibrate azimuth offset
+ *
+ * @param ctx gs232 context
+ * @return Status
+ */
+typedef bool (*rotator_offset_calibration_azimuth)(gs232_t **ctx);
+
+/**
+ * @fn bool (*rotator_offset_calibration_elevation)(gs232_t **ctx)
+ * @brief Calibrate elevation offset
+ *
+ * @param ctx gs232 context
+ * @return Status
+ */
+typedef bool (*rotator_offset_calibration_elevation)(gs232_t **ctx);
+
+/**
+ * @fn bool (*rotator_full_scale_calibration_azimuth)(gs232_t **ctx)
+ * @brief Calibrate azimuth full scale
+ *
+ * @param ctx gs232 context
+ * @return Status
+ */
+typedef bool (*rotator_full_scale_calibration_azimuth)(gs232_t **ctx);
+
+/**
+ * @fn bool (*rotator_full_scale_calibration_elevation)(gs232_t **ctx)
+ * @brief Calibrate elevation full scale
+ *
+ * @param ctx gs232 context
+ * @return Status
+ */
+typedef bool (*rotator_full_scale_calibration_elevation)(gs232_t **ctx);
+
+
+/**
  * @typedef gs232_t
  * @brief Context GS-232 data
  *
  */
-typedef struct {
+typedef struct gs232_s {
         bool b_protocol;              /*!< is GS-232B */
         bool is_450_degrees;          /*!< is 450 degrees mode */
         bool azimuth_nord_south;      /*!< center [0:north, 1:south] */
      uint8_t rotation_speed;          /*!< from command X */
-    uint16_t azimuth;                 /*!< azimuth */
-    uint16_t elevation;               /*!< elevation */
+    uint16_t azimuth;                 /*!< actual azimuth */
+    uint16_t elevation;               /*!< actual elevation */
     uint16_t memory[MEMORY_POINTS];   /*!< memory */
     uint16_t memory_qty;              /*!< memory used */
-    uint16_t current_point;           /*!< currently selected memorized point */
+    uint16_t memory_current_point;    /*!< currently selected memorized point */
     struct {
-          rotator_set_azimuth set_azimuth;
-          rotator_get_azimuth get_azimuth;
-        rotator_set_elevation set_elevation;
-        rotator_get_elevation get_elevation;
-    } fn;
-} gs232_t;
+                             rotator_set_azimuth set_azimuth;                      /*!< hardware function: set azimuth */
+                             rotator_get_azimuth get_azimuth;                      /*!< hardware function: get azimuth */
+                           rotator_set_elevation set_elevation;                    /*!< hardware function: set elevation */
+                           rotator_get_elevation get_elevation;                    /*!< hardware function: get elevation */
+              rotator_offset_calibration_azimuth offset_calibration_azimuth;       /*!< hardware function: azimuth offset calibration */
+            rotator_offset_calibration_elevation offset_calibration_elevation;     /*!< hardware function: elevation offset calibration */
+          rotator_full_scale_calibration_azimuth full_scale_calibration_azimuth;   /*!< hardware function: azimuth full scale calibration */
+        rotator_full_scale_calibration_elevation full_scale_calibration_elevation; /*!< hardware function: elevation full scale calibration */
+    } fn; /*!< hardware functions */
+} gs232_t; /*!< context */
 
 /**
  * @fn uint8_t gs232_init(gs232_t **ctx)
@@ -170,6 +213,24 @@ uint8_t gs232_parse_command(gs232_t **ctx, char *buffer, uint32_t buffer_len);
  */
 uint8_t gs232_return_string(gs232_t *ctx, uint8_t command, char **ret_str);
 
+/////////////////// utils ///////////////////
 
+/**
+ * @fn uint32_t shortestPath(float start_azimuth, float start_elevation, float end_azimuth, float end_elevation, float **intermediatePoints_azimuth,
+        float **intermediatePoints_elevation, float *azimuth, float *elevation)
+ * @brief Calculate the shortest path between two points, return intermediate points
+ *
+ * @param start_azimuth Azimuth start point
+ * @param start_elevation Elevation start point
+ * @param end_azimuth Azimuth end point
+ * @param end_elevation elevation end point
+ * @param intermediatePoints_azimuth Azimuth intermediate points
+ * @param intermediatePoints_elevation Elevation intermediate points
+ * @param azimuth Azimuth
+ * @param elevation Elevation
+ * @return Number of intermediate points
+ */
+uint32_t shortestPath(float start_azimuth, float start_elevation, float end_azimuth, float end_elevation, float **intermediatePoints_azimuth,
+        float **intermediatePoints_elevation, float *azimuth, float *elevation);
 
 #endif /* LIB_GS232_H_ */

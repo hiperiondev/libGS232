@@ -64,8 +64,8 @@ int main(int, char const*[]) {
         printf("  azimuth_nord_south: %d\n", context->azimuth_nord_south);
         printf("  is_450_degrees: %d\n", context->is_450_degrees);
         printf("  rotation_speed: %d\n", context->rotation_speed);
-        printf("  memory_qty: %d\n", context->memory_qty);
-        printf("  current_point: %d\n", context->current_point);
+        printf("  memory used: %d\n", context->memory_qty);
+        printf("  memory current_point: %d\n", context->memory_current_point);
 
         for (uint16_t n = 0; n < context->memory_qty; n++)
             printf("  memory[%d]: %d\n", n, context->memory[n]);

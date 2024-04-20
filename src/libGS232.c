@@ -19,6 +19,7 @@
 #include <limits.h>
 #include <ctype.h>
 #include <string.h>
+#include <math.h>
 
 #include "libGS232.h"
 
@@ -536,7 +537,7 @@ uint8_t gs232_return_string(gs232_t *ctx, uint8_t command, char **ret_str) {
 
         case GS232_OFFSET_CALIBRATION_AZIMUTH: // O
         {
-            // TODO: complete command
+            // external command
             const char tmp[] = "\r\0";
             (*ret_str) = strdup(tmp);
         }
@@ -545,7 +546,7 @@ uint8_t gs232_return_string(gs232_t *ctx, uint8_t command, char **ret_str) {
 
         case GS232_OFFSET_CALIBRATION_ELEVATION: // O2
         {
-            // TODO: complete command
+            // external command
             const char tmp[] = "\r\0";
             (*ret_str) = strdup(tmp);
         }
@@ -554,7 +555,7 @@ uint8_t gs232_return_string(gs232_t *ctx, uint8_t command, char **ret_str) {
 
         case GS232_FULL_SCALE_CALIBRATION_AZIMUTH: // F
         {
-            // TODO: complete command
+            // external command
             const char tmp[] = "\r\0";
             (*ret_str) = strdup(tmp);
         }
@@ -563,7 +564,7 @@ uint8_t gs232_return_string(gs232_t *ctx, uint8_t command, char **ret_str) {
 
         case GS232_FULL_SCALE_CALIBRATION_ELEVATION: // F2
         {
-            // TODO: complete command
+            // external command
             const char tmp[] = "\r\0";
             (*ret_str) = strdup(tmp);
         }
@@ -574,7 +575,7 @@ uint8_t gs232_return_string(gs232_t *ctx, uint8_t command, char **ret_str) {
         {
             char tmp[16];
             // TODO: current used point start on 0 or 1 ??
-            sprintf(tmp, "%s%04d%s%04d\r\n", ctx->b_protocol ? "=" : "+", ctx->current_point + 1, ctx->b_protocol ? "=" : "+", ctx->memory_qty);
+            sprintf(tmp, "%s%04d%s%04d\r\n", ctx->b_protocol ? "=" : "+", ctx->memory_current_point + 1, ctx->b_protocol ? "=" : "+", ctx->memory_qty);
             (*ret_str) = strdup(tmp);
         }
 
@@ -604,7 +605,7 @@ uint8_t gs232_init(gs232_t **ctx) {
     (*ctx)->is_450_degrees = false;
     (*ctx)->rotation_speed = 1;
     (*ctx)->memory_qty = 0;
-    (*ctx)->current_point = 0;
+    (*ctx)->memory_current_point = 0;
 
     for (uint16_t n = 0; n < MEMORY_POINTS; n++)
         (*ctx)->memory[n] = 0;
@@ -617,4 +618,31 @@ uint8_t gs232_deinit(gs232_t **ctx) {
         free(*ctx);
 
     return GS232_OK;
+}
+
+/////////////////// utils ///////////////////
+
+uint32_t shortestPath(float start_azimuth, float start_elevation, float end_azimuth, float end_elevation, float **intermediatePoints_azimuth,
+        float **intermediatePoints_elevation, float *azimuth, float *elevation) {
+    float azimuthDiff = end_azimuth - start_azimuth;
+    float elevationDiff = end_elevation - start_elevation;
+    float distance = sqrt(azimuthDiff * azimuthDiff + elevationDiff * elevationDiff);
+
+    *azimuth = atan2f(azimuthDiff, elevationDiff);
+    *elevation = distance;
+
+    uint32_t numIntermediatePoints = (uint32_t) ceil(distance);
+
+    *intermediatePoints_azimuth = (float*) malloc(numIntermediatePoints * sizeof(float));
+    *intermediatePoints_elevation = (float*) malloc(numIntermediatePoints * sizeof(float));
+
+    float azimuthStep = azimuthDiff / numIntermediatePoints;
+    float elevationStep = elevationDiff / numIntermediatePoints;
+
+    for (int i = 0; i < numIntermediatePoints; i++) {
+        (*intermediatePoints_azimuth)[i] = start_azimuth + i * azimuthStep;
+        (*intermediatePoints_elevation)[i] = start_elevation + i * elevationStep;
+    }
+
+    return numIntermediatePoints;
 }
